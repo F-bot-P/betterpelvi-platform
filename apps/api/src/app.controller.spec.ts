@@ -1,22 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { SupabaseAuthGuard } from './auth/supabase.guard';
 
-describe('AppController', () => {
-  let appController: AppController;
-
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
-      providers: [AppService],
-    }).compile();
-
-    appController = app.get<AppController>(AppController);
-  });
-
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
-    });
-  });
-});
+@Controller()
+export class AppController {
+  @Get('me')
+  @UseGuards(SupabaseAuthGuard)
+  getMe(@Req() req) {
+    return {
+      userId: req.user.id,
+      email: req.user.email,
+    };
+  }
+}
