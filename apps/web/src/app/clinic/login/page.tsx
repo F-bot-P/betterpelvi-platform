@@ -206,6 +206,19 @@ export default function ClinicLoginPage() {
 
   return (
     <div style={wrap()}>
+      <style jsx global>{`
+        @keyframes bp-spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        @media (max-width: 640px) {
+          .bp-card {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+          }
+        }
+      `}</style>
       <div style={stage()}>
         {/* BIG BACKGROUND LOGO */}
         <img
@@ -215,7 +228,7 @@ export default function ClinicLoginPage() {
         />
 
         {/* LOGIN CARD */}
-        <div style={card()}>
+        <div className="bp-card" style={card()}>
           <div style={{ fontSize: 28, fontWeight: 900, marginBottom: 18 }}>
             Clinic Login
           </div>
@@ -293,6 +306,10 @@ export default function ClinicLoginPage() {
 function wrap(): React.CSSProperties {
   return {
     minHeight: '100vh',
+    display: 'grid',
+    placeItems: 'center',
+    padding:
+      'max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom))',
     background:
       'radial-gradient(900px 400px at 50% 0%, rgba(231, 101, 101, 0.18), transparent 60%), #f8f8fa',
     color: '#111827',
@@ -302,10 +319,12 @@ function wrap(): React.CSSProperties {
 function stage(): React.CSSProperties {
   return {
     position: 'relative',
-    minHeight: '100vh',
+    width: '100%',
+    minHeight: '100svh',
     display: 'grid',
     placeItems: 'center',
-    padding: '24px 16px', // ✅ single, consistent padding (mobile-safe)
+    paddingTop: 'clamp(16px, 5vh, 56px)',
+    paddingBottom: 'clamp(16px, 5vh, 56px)',
     overflow: 'hidden',
   };
 }
@@ -372,10 +391,10 @@ function backgroundLogo(): React.CSSProperties {
     position: 'absolute',
     left: '50%',
     transform: 'translateX(-50%)',
-    bottom: -220, // ✅ responsive: anchor to bottom instead of fixed top pixels
-    width: 'min(820px, 160vw)', // ✅ scales on mobile
-    maxWidth: 900,
-    opacity: 0.28,
+    top: 'clamp(240px, 46vh, 420px)',
+    width: 'min(800px, 120vw)',
+    height: 'auto',
+    opacity: 0.22,
     zIndex: 0,
     pointerEvents: 'none',
     filter: 'blur(1px) drop-shadow(0 60px 120px rgba(231, 101, 101, 0.35))',

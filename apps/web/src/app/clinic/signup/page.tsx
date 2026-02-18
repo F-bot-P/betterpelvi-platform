@@ -222,6 +222,7 @@ export default function ClinicSignupPage() {
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
     setErr(null);
     setOkMsg(null);
 
@@ -267,7 +268,11 @@ export default function ClinicSignupPage() {
     <div style={wrap()}>
       {/* page-level responsive fixes without touching your global structure */}
       <style jsx global>{`
-        /* Kill iOS typing lag: backdrop-filter + heavy blur = jank */
+        @keyframes bp-spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
         @media (max-width: 640px) {
           .bp-card {
             backdrop-filter: none !important;
@@ -355,10 +360,11 @@ function wrap(): React.CSSProperties {
     minHeight: '100vh',
     display: 'grid',
     placeItems: 'center',
-    padding: 18,
+    padding:
+      'max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom))',
     background:
-      'radial-gradient(1200px 600px at 50% 20%, rgba(242, 114, 114, 0.15), transparent 60%), #ececf1',
-    color: 'black',
+      'radial-gradient(900px 400px at 50% 0%, rgba(231, 101, 101, 0.18), transparent 60%), #f8f8fa',
+    color: '#111827',
   };
 }
 
@@ -366,15 +372,14 @@ function stage(): React.CSSProperties {
   return {
     position: 'relative',
     width: '100%',
-    minHeight: '100vh',
+    minHeight: '100svh',
     display: 'grid',
     placeItems: 'center',
-    paddingTop: 80,
-    paddingBottom: 80,
+    paddingTop: 'clamp(16px, 5vh, 56px)',
+    paddingBottom: 'clamp(16px, 5vh, 56px)',
     overflow: 'hidden',
   };
 }
-
 function card(): React.CSSProperties {
   return {
     position: 'relative',
@@ -431,8 +436,8 @@ function backgroundLogo(): React.CSSProperties {
     position: 'absolute',
     left: '50%',
     transform: 'translateX(-50%)',
-    top: 'clamp(220px, 42vh, 420px)',
-    width: 'min(800px, 120vw)', // responsive, avoids harsh cropping
+    top: 'clamp(240px, 46vh, 420px)',
+    width: 'min(800px, 120vw)',
     height: 'auto',
     opacity: 0.22,
     zIndex: 0,
