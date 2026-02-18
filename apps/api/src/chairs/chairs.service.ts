@@ -156,4 +156,44 @@ export class ChairsService {
     if (error) throw new BadRequestException(error.message);
     return data;
   }
+  async updateDeviceForClinic(clinicId: string, chairId: string, body: any) {
+    const device_id = (body?.device_id ?? '').toString().trim() || null;
+    const mqtt_topic = (body?.mqtt_topic ?? '').toString().trim() || null;
+    const topic_prefix = (body?.topic_prefix ?? '').toString().trim() || null;
+    const shelly_url = (body?.shelly_url ?? '').toString().trim() || null;
+
+    const shelly_relay =
+      body?.shelly_relay === '' ||
+      body?.shelly_relay === null ||
+      body?.shelly_relay === undefined
+        ? null
+        : Number(body.shelly_relay);
+
+    if (
+      shelly_relay !== null &&
+      (!Number.isFinite(shelly_relay) || shelly_relay < 0)
+    ) {
+      throw new BadRequestException('Invalid shelly_relay');
+    }
+
+    // IMPORTANT: scope update to this clinic only
+    const { data, error } = await supabaseAdmin
+      .from('chairs')
+      .update({
+        device_id,
+        mqtt_topic,
+        topic_prefix,
+        shelly_url,
+        shelly_relay,
+      })
+      .eq('id', chairId)
+      .eq('clinic_id', clinicId)
+      .select(
+        'id, name, clinic_id, is_active, device_id, mqtt_topic, topic_prefix, shelly_url, shelly_relay',
+      )
+      .single();
+
+    if (error) throw new BadRequestException(error.message);
+    return data;
+  }
 }
