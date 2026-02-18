@@ -284,6 +284,7 @@ export default function ClinicSignupPage() {
       <div style={stage()}>
         {/* BIG BACKGROUND LOGO */}
         <img
+          className="bp-logo"
           src="/brand/logo-full.png"
           alt="BetterPelvi"
           style={backgroundLogo()}
@@ -357,7 +358,7 @@ export default function ClinicSignupPage() {
 
 function wrap(): React.CSSProperties {
   return {
-    minHeight: '100vh',
+    minHeight: '100svh',
     display: 'grid',
     placeItems: 'center',
     padding:
@@ -372,7 +373,8 @@ function stage(): React.CSSProperties {
   return {
     position: 'relative',
     width: '100%',
-    minHeight: '100svh',
+    minHeight: '100vh',
+    height: '100dvh',
     display: 'grid',
     placeItems: 'center',
     paddingTop: 'clamp(16px, 5vh, 56px)',
@@ -387,8 +389,8 @@ function card(): React.CSSProperties {
     width: 'min(520px, 92vw)',
     borderRadius: 18,
     padding: 22,
-    background: 'rgba(255, 255, 255, 0.86)',
-    border: '1px solid rgba(0,0,0,0.08)',
+    background: 'rgba(163, 95, 95, 0.05)',
+    border: '1px solid rgba(255,255,255,0.12)',
     boxShadow: '0 18px 50px rgba(0,0,0,0.25)',
     backdropFilter: 'blur(10px)',
     WebkitBackdropFilter: 'blur(10px)',

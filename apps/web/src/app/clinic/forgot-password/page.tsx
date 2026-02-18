@@ -286,6 +286,7 @@ function stage(): React.CSSProperties {
     position: 'relative',
     width: '100%',
     minHeight: '100vh',
+    height: '100dvh',
     display: 'grid',
     placeItems: 'center',
     paddingTop: 40, // was 120 (too much on mobile)

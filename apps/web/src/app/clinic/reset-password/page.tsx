@@ -176,6 +176,7 @@ export default function ClinicResetPasswordPage() {
       <div style={stage()}>
         {/* BIG BACKGROUND LOGO */}
         <img
+          className="bp-logo"
           src="/brand/logo-full.png"
           alt="BetterPelvi"
           style={backgroundLogo()}
@@ -233,6 +234,7 @@ function stage(): React.CSSProperties {
     position: 'relative',
     width: '100%',
     minHeight: '100vh',
+    height: '100dvh',
     display: 'grid',
     placeItems: 'center',
     paddingTop: 40,

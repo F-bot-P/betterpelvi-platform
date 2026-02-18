@@ -329,6 +329,7 @@ export default function QrClientPage() {
         </div>
         {/* Logo is a sibling, not inside flex */}
         <img
+         className="bp-logo"
           src="/brand/logo-full.png"
           alt="BetterPelvi"
           style={{

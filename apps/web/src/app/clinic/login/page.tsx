@@ -217,11 +217,15 @@ export default function ClinicLoginPage() {
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
           }
+          .bp-logo {
+            filter: none !important;
+          }
         }
       `}</style>
       <div style={stage()}>
         {/* BIG BACKGROUND LOGO */}
         <img
+          className="bp-logo"
           src="/brand/logo-full.png"
           alt="BetterPelvi"
           style={backgroundLogo()}
@@ -320,7 +324,8 @@ function stage(): React.CSSProperties {
   return {
     position: 'relative',
     width: '100%',
-    minHeight: '100svh',
+    minHeight: '100vh',
+    height: '100dvh',
     display: 'grid',
     placeItems: 'center',
     paddingTop: 'clamp(16px, 5vh, 56px)',

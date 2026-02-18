@@ -319,6 +319,7 @@ export default function ClientDetailPage() {
       <div style={header()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img
+           className="bp-logo"
             src="/brand/logo-full-small-ui.png"
             alt="BetterPelvi"
             style={{
