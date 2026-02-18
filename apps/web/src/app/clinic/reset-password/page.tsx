@@ -233,8 +233,7 @@ function stage(): React.CSSProperties {
   return {
     position: 'relative',
     width: '100%',
-    minHeight: '100vh',
-    height: '100dvh',
+    minHeight: '100svh',
     display: 'grid',
     placeItems: 'center',
     paddingTop: 40,

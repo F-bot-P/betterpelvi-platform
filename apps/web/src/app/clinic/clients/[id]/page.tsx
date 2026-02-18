@@ -1,4 +1,4 @@
-'use client';
+// 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -8,6 +8,59 @@ import { jsPDF } from 'jspdf';
 import * as htmlToImage from 'html-to-image';
 
 const CORAL = '#f15b5b';
+const GLOBAL_CSS = `
+  /* Keep page from flashing white during transitions */
+  html, body {
+    background: #f8f8fa;
+  }
+
+  /* Shell */
+  .bp-client-shell {
+    background: transparent;
+  }
+
+  /* Responsive header */
+  @media (max-width: 900px) {
+    .bp-client-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 12px !important;
+    }
+
+    .bp-client-header-actions {
+      width: 100% !important;
+      display: flex !important;
+      gap: 10px !important;
+      flex-wrap: wrap !important;
+    }
+
+    .bp-client-header-actions button {
+      flex: 1 1 auto !important;
+      min-width: 140px;
+    }
+  }
+
+  /* Responsive grid: stack panels on mobile */
+  @media (max-width: 900px) {
+    .bp-client-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  /* Form grid: 2 columns on desktop, 1 column on mobile */
+  @media (max-width: 600px) {
+    .bp-client-form-grid {
+      grid-template-columns: 1fr !important;
+      gap: 12px !important;
+    }
+  }
+
+  /* QR + text: prevent overflow */
+  .bp-client-qr-url {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+`;
 
 /* =========================
    Types
@@ -238,8 +291,39 @@ export default function ClientDetailPage() {
 
   /* ---------- Guards ---------- */
 
-  if (initialLoading) return <div style={{ padding: 24 }} />;
-  if (!client) return <div style={{ padding: 24 }}>Client not found</div>;
+  if (initialLoading)
+    return (
+      <div
+        style={{
+          minHeight: '100svh',
+          padding: 18,
+          background: 'transparent',
+        }}
+        className="bp-client-shell"
+      >
+        <style jsx global>
+          {GLOBAL_CSS}
+        </style>
+        <div style={{ fontWeight: 800, opacity: 0.7 }}>Loading…</div>
+      </div>
+    );
+
+  if (!client)
+    return (
+      <div
+        style={{
+          minHeight: '100svh',
+          padding: 18,
+          background: 'transparent',
+        }}
+        className="bp-client-shell"
+      >
+        <style jsx global>
+          {GLOBAL_CSS}
+        </style>
+        <div style={{ padding: 24 }}>Client not found</div>
+      </div>
+    );
 
   /* ---------- Session Actions (OLD LOGIC, RESTORED) ---------- */
 
@@ -314,12 +398,23 @@ export default function ClientDetailPage() {
   });
 
   return (
-    <div style={{ padding: 18, background: '#fff', minHeight: '100vh' }}>
+    <div
+      style={{
+        padding: 18,
+        minHeight: '100svh',
+        background: 'transparent',
+      }}
+      className="bp-client-shell"
+    >
+      <style jsx global>
+        {GLOBAL_CSS}
+      </style>
+
       {/* HEADER */}
-      <div style={header()}>
+      <div style={header()} className="bp-client-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img
-           className="bp-logo"
+            className="bp-logo"
             src="/brand/logo-full-small-ui.png"
             alt="BetterPelvi"
             style={{
@@ -333,7 +428,10 @@ export default function ClientDetailPage() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div
+          style={{ display: 'flex', gap: 10 }}
+          className="bp-client-header-actions"
+        >
           <button style={btnGhost()} onClick={goToDevicePairing}>
             Pair device
           </button>
@@ -344,9 +442,9 @@ export default function ClientDetailPage() {
         </div>
       </div>
 
-      <div style={grid()}>
+      <div style={grid()} className="bp-client-grid">
         {/* LEFT */}
-        <div style={panel()}>
+        <div style={panel()} className="bp-client-panel">
           <h2 style={{ marginBottom: 12, color: '#111827' }}>
             {client.full_name}
           </h2>
@@ -355,7 +453,7 @@ export default function ClientDetailPage() {
             {saving ? 'Saving…' : 'Save'}
           </button>
 
-          <div style={formGrid()}>
+          <div style={formGrid()} className="bp-client-form-grid">
             <Input label="Full name" value={fullName} onChange={setFullName} />
             <Input label="Phone" value={phone} onChange={setPhone} />
             <Input label="Email" value={email} onChange={setEmail} />
@@ -445,8 +543,7 @@ export default function ClientDetailPage() {
               </button>
             </div>
           </div>
-          {/* 
-          { */}
+
           {qrToken && (
             <div ref={qrPdfRef}>
               <div style={{ marginTop: 25, textAlign: 'center' }}>
@@ -457,9 +554,8 @@ export default function ClientDetailPage() {
                 />
               </div>
 
-              {}
-
               <div
+                className="bp-client-qr-url"
                 style={{
                   fontSize: 11,
                   wordBreak: 'break-all',
@@ -478,8 +574,7 @@ export default function ClientDetailPage() {
             {active?.id ? (
               <>
                 <div style={{ fontSize: 13, color: '#0c0c0c' }}>
-                  Session active — auto ends at{' '}
-                  <b>{fmtDT(active.auto_end_at)}</b>
+                  Session active — auto ends at <b>{fmtDT(active.auto_end_at)}</b>
                 </div>
                 <div
                   style={{
@@ -545,7 +640,6 @@ export default function ClientDetailPage() {
 
   async function downloadQrPdf() {
     if (!qrPdfRef.current || !client || !qrToken) return;
-
     try {
       // 1. Convert QR block to image
       const dataUrl = await htmlToImage.toPng(qrPdfRef.current, {
@@ -681,7 +775,10 @@ export default function ClientDetailPage() {
       width: '100%',
       padding: '10px 12px',
       borderRadius: 10,
-      border: '1 px solid #727374',
+      border: '1px solid #727374',
+      background: '#f1f3f5',
+      color: '#111827',
+      outline: 'none',
     };
   }
   function btnGhost(): React.CSSProperties {
@@ -709,7 +806,6 @@ export default function ClientDetailPage() {
       width: 120,
       height: 120,
       borderRadius: '80%',
-
       padding: 10,
       marginTop: 12,
     };

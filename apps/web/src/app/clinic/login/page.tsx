@@ -313,7 +313,7 @@ function wrap(): React.CSSProperties {
     display: 'grid',
     placeItems: 'center',
     padding:
-      'max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom))',
+      'max(12px, env(safe-area-inset-top)) 14px max(12px, env(safe-area-inset-bottom))',
     background:
       'radial-gradient(900px 400px at 50% 0%, rgba(231, 101, 101, 0.18), transparent 60%), #f8f8fa',
     color: '#111827',
@@ -324,12 +324,12 @@ function stage(): React.CSSProperties {
   return {
     position: 'relative',
     width: '100%',
-    minHeight: '100vh',
-    height: '100dvh',
+    minHeight: '100svh',
+
     display: 'grid',
     placeItems: 'center',
-    paddingTop: 'clamp(16px, 5vh, 56px)',
-    paddingBottom: 'clamp(16px, 5vh, 56px)',
+    paddingTop: 'clamp(12px, 4vh, 48px)',
+    paddingBottom: 'clamp(12px, 4vh, 48px)',
     overflow: 'hidden',
   };
 }

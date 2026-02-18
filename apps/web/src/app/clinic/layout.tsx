@@ -48,7 +48,7 @@ export default function ClinicLayout({
     pathname?.startsWith('/clinic/reset-password');
 
   return (
-    <div style={{ minHeight: '100vh', background: `...` }}>
+    <div style={{ minHeight: '100vh', background: `radial-gradient(1200px 600px at 90% 10%, rgba(231, 101, 101, 0.12), transparent 60%), #f8f8fa` }}>
       <style jsx global>{`
         /* Prevent iOS "black" background when keyboard opens/closes */
         html,
