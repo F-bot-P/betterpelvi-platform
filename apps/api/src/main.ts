@@ -74,19 +74,28 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // ✅ CORS
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3002',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3002',
+    ...(process.env.CORS_ORIGINS?.split(',').map((s) => s.trim()) ?? []),
+    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+  ].filter(Boolean);
+
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:3002',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3002',
-      process.env.FRONTEND_URL || '',
-    ],
+    origin: (origin, cb) => {
+      // allow server-to-server / curl / render health checks (no Origin)
+      if (!origin) return cb(null, true);
+
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+
+      return cb(new Error(`CORS blocked for origin: ${origin}`), false);
+    },
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
-
   // 🔥 CLEAN UP EXPIRED SESSIONS
   try {
     const now = new Date().toISOString();
