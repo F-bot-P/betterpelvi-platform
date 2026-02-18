@@ -73,24 +73,21 @@ import { supabaseAdmin } from './lib/supabase-admin';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // ✅ CORS
   const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3002',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3002',
     ...(process.env.CORS_ORIGINS?.split(',').map((s) => s.trim()) ?? []),
-    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL.trim()] : []),
   ].filter(Boolean);
 
   app.enableCors({
     origin: (origin, cb) => {
-      // allow server-to-server / curl / render health checks (no Origin)
-      if (!origin) return cb(null, true);
-
+      if (!origin) return cb(null, true); // curl/healthchecks
+      if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return cb(null, true); // allow previews
       if (allowedOrigins.includes(origin)) return cb(null, true);
-
-      return cb(new Error(`CORS blocked for origin: ${origin}`), false);
+      return cb(null, false);
     },
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
