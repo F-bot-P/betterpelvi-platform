@@ -1,4 +1,4 @@
-// 'use client';
+'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -574,7 +574,8 @@ export default function ClientDetailPage() {
             {active?.id ? (
               <>
                 <div style={{ fontSize: 13, color: '#0c0c0c' }}>
-                  Session active — auto ends at <b>{fmtDT(active.auto_end_at)}</b>
+                  Session active — auto ends at{' '}
+                  <b>{fmtDT(active.auto_end_at)}</b>
                 </div>
                 <div
                   style={{
