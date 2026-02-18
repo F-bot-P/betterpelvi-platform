@@ -63,7 +63,15 @@
 //     return chair ? chair : { id: null };
 //   }
 // }
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ChairsService } from './chairs.service';
 import { SupabaseAuthGuard } from '../auth/supabase-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -93,5 +101,19 @@ export class ChairsController {
   async default(@Req() req: any) {
     const chairs = await this.chairs.listForClinic(req.user.clinicId);
     return chairs[0] ?? null;
+  }
+
+  @Get(':id')
+  async getOne(@Req() req: any, @Param('id') id: string) {
+    return this.chairs.getForClinic(req.user.clinicId, id);
+  }
+
+  /**
+   * PATCH /chairs/:id/pair
+   * Save Shelly/MQTT device configuration for a chair
+   */
+  @Patch(':id/pair')
+  async pair(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+    return this.chairs.pairForClinic(req.user.clinicId, id, body);
   }
 }
