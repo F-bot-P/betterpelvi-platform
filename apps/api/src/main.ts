@@ -106,7 +106,7 @@ async function bootstrap() {
     console.error('[BOOT] Failed to clean expired sessions', err);
   }
 
-  // ✅ VERY IMPORTANT FOR RAILWAY
+  //  VERY IMPORTANT FOR RAILWAY
   const port = process.env.PORT || 3001;
 
   await app.listen(port);
