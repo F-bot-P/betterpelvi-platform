@@ -12,7 +12,7 @@ import { ShellyMqttService } from './lib/shelly-mqtt.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: 'apps/api/.env' }),
     AuthModule,
     MeModule,
     ClientsModule,
