@@ -1,9 +1,11 @@
 export default function ClientDetailSkeleton() {
   return (
     <div
+      className="bp-client-skel-page"
       style={{
         minHeight: '100svh',
-        padding: 18,
+        padding:
+          'max(12px, env(safe-area-inset-top)) 14px max(12px, env(safe-area-inset-bottom))',
         background:
           'radial-gradient(900px 400px at 50% 0%, rgba(231, 101, 101, 0.14), transparent 60%), #f8f8fa',
       }}
@@ -11,6 +13,7 @@ export default function ClientDetailSkeleton() {
       <div style={{ maxWidth: 980, margin: '0 auto' }}>
         {/* Header */}
         <div
+          className="bp-client-skel-header"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -22,7 +25,10 @@ export default function ClientDetailSkeleton() {
           <div
             style={{ height: 18, width: 180, borderRadius: 10, ...shimmer() }}
           />
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div
+            className="bp-client-skel-actions"
+            style={{ display: 'flex', gap: 10 }}
+          >
             <div
               style={{ height: 36, width: 120, borderRadius: 12, ...shimmer() }}
             />
@@ -34,6 +40,7 @@ export default function ClientDetailSkeleton() {
 
         {/* Grid */}
         <div
+          className="bp-client-skel-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: '1.25fr 1fr',
@@ -55,6 +62,7 @@ export default function ClientDetailSkeleton() {
             />
 
             <div
+              className="bp-client-skel-formgrid"
               style={{
                 marginTop: 16,
                 display: 'grid',
@@ -169,14 +177,6 @@ export default function ClientDetailSkeleton() {
           </div>
         </div>
       </div>
-
-      <style jsx global>{`
-        @media (max-width: 900px) {
-          .bp-skel-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

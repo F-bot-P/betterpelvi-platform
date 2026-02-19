@@ -10,24 +10,6 @@ export default function DeviceSkeleton() {
         placeItems: 'start center',
       }}
     >
-      <style>{`
-        @keyframes bp-shimmer {
-          0% { background-position: -600px 0; }
-          100% { background-position: 600px 0; }
-        }
-        .bp-skel {
-          background: linear-gradient(
-            90deg,
-            rgba(0,0,0,0.06) 0%,
-            rgba(0,0,0,0.10) 35%,
-            rgba(0,0,0,0.06) 70%
-          );
-          background-size: 600px 100%;
-          animation: bp-shimmer 1.1s linear infinite;
-          border-radius: 999px;
-        }
-      `}</style>
-
       <div style={{ width: 'min(980px, 92vw)' }}>
         <div
           style={{
@@ -41,8 +23,14 @@ export default function DeviceSkeleton() {
         >
           <div className="bp-skel" style={{ width: 180, height: 22 }} />
           <div style={{ display: 'flex', gap: 10 }}>
-            <div className="bp-skel" style={{ width: 120, height: 38 }} />
-            <div className="bp-skel" style={{ width: 110, height: 38 }} />
+            <div
+              className="bp-skel"
+              style={{ width: 120, height: 38, borderRadius: 12 }}
+            />
+            <div
+              className="bp-skel"
+              style={{ width: 110, height: 38, borderRadius: 12 }}
+            />
           </div>
         </div>
 
@@ -61,7 +49,12 @@ export default function DeviceSkeleton() {
           />
           <div
             className="bp-skel"
-            style={{ width: '100%', height: 44, marginBottom: 12 }}
+            style={{
+              width: '100%',
+              height: 44,
+              marginBottom: 12,
+              borderRadius: 12,
+            }}
           />
 
           <div
@@ -85,7 +78,10 @@ export default function DeviceSkeleton() {
           />
 
           <div style={{ height: 14 }} />
-          <div className="bp-skel" style={{ width: '100%', height: 44 }} />
+          <div
+            className="bp-skel"
+            style={{ width: '100%', height: 44, borderRadius: 12 }}
+          />
         </div>
       </div>
     </div>

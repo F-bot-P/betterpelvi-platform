@@ -1,4 +1,4 @@
-:root {
+/* :root {
   --bg: #0b0b0f;
   --panel: #12121a;
   --panel2: #171725;
@@ -52,4 +52,106 @@ hr {
   border: 0;
   border-top: 1px solid var(--border);
   margin: 16px 0;
+} */
+:root {
+  /* ✅ LIGHT base for the app (matches clinic) */
+  --bg: #f8f8fa;
+  --panel: rgba(255, 255, 255, 0.92);
+  --text: #111827;
+  --muted: #6b7280;
+  --border: rgba(0, 0, 0, 0.1);
+  --primary: #e76565;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
+  /* ✅ prevents “white/black” flashes during navigation */
+  background: var(--bg);
+}
+
+/* Prevent iOS rubber-band showing gaps behind */
+body {
+  overscroll-behavior-y: none;
+  color: var(--text);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial,
+    'Apple Color Emoji',
+    'Segoe UI Emoji';
+}
+
+a {
+  color: var(--text);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+input,
+button,
+textarea {
+  font: inherit;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
+
+/* =========================
+   ✅ Skeleton shimmer (global)
+========================= */
+@keyframes bp-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+* ✅ Reusable shimmer block */ .bp-skel {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 0%,
+    rgba(0, 0, 0, 0.1) 35%,
+    rgba(0, 0, 0, 0.06) 70%
+  );
+  background-size: 240% 100%;
+  animation: bp-shimmer 1.1s ease-in-out infinite;
+  border-radius: 999px;
+}
+/* Mobile responsiveness for skeleton */
+@media (max-width: 900px) {
+  .bp-client-skel-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .bp-client-skel-actions {
+    width: 100%;
+  }
+  .bp-client-skel-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .bp-client-skel-formgrid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
 }
