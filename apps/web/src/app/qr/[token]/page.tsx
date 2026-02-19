@@ -512,48 +512,146 @@ export default function QrClientPage() {
     </div>
   );
 }
+// function QrClientSkeleton() {
+//   return (
+//     <div
+//       style={{
+//         padding: 18,
+//         maxWidth: 560,
+//         margin: '0 auto',
+//       }}
+//     >
+//       <div style={panel()}>
+//         {/* Header row (client name placeholder) */}
+//         <div
+//           style={{
+//             display: 'flex',
+//             justifyContent: 'space-between',
+//             gap: 12,
+//             alignItems: 'baseline',
+//           }}
+//         >
+//           <div style={{ ...skLine(120, 20) }} />
+//         </div>
+
+//         {/* Logo placeholder exactly where your logo is */}
+//         <div
+//           style={{
+//             position: 'absolute',
+//             top: 14,
+//             right: 34,
+//             height: 88,
+//             width: 190,
+//             borderRadius: 12,
+//             background: '#e5e7eb',
+//             animation: 'bpPulse 1.1s ease-in-out infinite',
+//           }}
+//         />
+
+//         {/* Credits */}
+//         <div style={{ marginTop: 14 }}>
+//           <div style={{ ...skLine(70, 14) }} /> {/* Sessions */}
+//           <div style={{ marginTop: 8, ...skLine(160, 14) }} /> {/* Used x/y */}
+//           <div style={{ marginTop: 10, ...skLine(220, 30) }} />{' '}
+//           {/* Remaining: */}
+//         </div>
+
+//         {/* Donut + right column */}
+//         <div
+//           style={{
+//             marginTop: 12,
+//             display: 'flex',
+//             alignItems: 'center',
+//             gap: 14,
+//           }}
+//         >
+//           {/* Donut skeleton (ring + inner) */}
+//           <div style={skDonutWrap()}>
+//             <div style={skDonutRing()}>
+//               <div style={skDonutInner()}>
+//                 <div style={{ ...skLine(70, 12) }} />
+//                 <div style={{ marginTop: 8, ...skLine(40, 18) }} />
+//               </div>
+//             </div>
+//           </div>
+
+//           <div style={{ flex: 1 }}>
+//             {/* Session active text placeholder */}
+//             <div style={{ ...skLine('100%', 14) }} />
+//             <div style={{ marginTop: 8, ...skLine(120, 26) }} /> {/* timer */}
+//             {/* Primary action button placeholder */}
+//             <div style={{ marginTop: 12, ...skBtn() }} />
+//             {/* Refresh button placeholder */}
+//             <div style={{ marginTop: 10, ...skBtn() }} />
+//           </div>
+//         </div>
+
+//         {/* History */}
+//         <div style={{ marginTop: 18 }}>
+//           <div style={{ ...skLine(70, 16) }} /> {/* History title */}
+//           <div style={{ marginTop: 10, display: 'grid', gap: 10 }}>
+//             <div style={skHistoryCard()} />
+//             <div style={skHistoryCard()} />
+//           </div>
+//         </div>
+
+//         {/* Pulse animation */}
+//         <style jsx global>{`
+//           @keyframes bpPulse {
+//             0% {
+//               opacity: 0.55;
+//             }
+//             50% {
+//               opacity: 1;
+//             }
+//             100% {
+//               opacity: 0.55;
+//             }
+//           }
+//         `}</style>
+//       </div>
+//     </div>
+//   );
+// }
+
 function QrClientSkeleton() {
   return (
-    <div
-      style={{
-        padding: 18,
-        maxWidth: 560,
-        margin: '0 auto',
-      }}
-    >
+    <div style={{ padding: 18, maxWidth: 560, margin: '0 auto' }}>
       <div style={panel()}>
-        {/* Header row (client name placeholder) */}
+        {/* ✅ Smaller logo placeholder, tighter to the corner, no overlap */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 12,
+            width: 128,
+            height: 44,
+            borderRadius: 12,
+            background: '#e5e7eb',
+            animation: 'bpPulse 1.1s ease-in-out infinite',
+            zIndex: 2,
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Header row (reserve space on the right so text never goes under logo) */}
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             gap: 12,
             alignItems: 'baseline',
+            paddingRight: 150, // ✅ reserves space for the logo placeholder
           }}
         >
-          <div style={{ ...skLine(120, 20) }} />
+          <div style={skLine(140, 20)} />
         </div>
-
-        {/* Logo placeholder exactly where your logo is */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 14,
-            right: 34,
-            height: 88,
-            width: 190,
-            borderRadius: 12,
-            background: '#e5e7eb',
-            animation: 'bpPulse 1.1s ease-in-out infinite',
-          }}
-        />
 
         {/* Credits */}
         <div style={{ marginTop: 14 }}>
-          <div style={{ ...skLine(70, 14) }} /> {/* Sessions */}
-          <div style={{ marginTop: 8, ...skLine(160, 14) }} /> {/* Used x/y */}
-          <div style={{ marginTop: 10, ...skLine(220, 30) }} />{' '}
-          {/* Remaining: */}
+          <div style={skLine(80, 14)} />
+          <div style={{ marginTop: 8, ...skLine(170, 14) }} />
+          <div style={{ marginTop: 10, ...skLine(240, 30) }} />
         </div>
 
         {/* Donut + right column */}
@@ -565,37 +663,46 @@ function QrClientSkeleton() {
             gap: 14,
           }}
         >
-          {/* Donut skeleton (ring + inner) */}
+          {/* ✅ Donut ring only (no inner lines) */}
           <div style={skDonutWrap()}>
-            <div style={skDonutRing()}>
-              <div style={skDonutInner()}>
-                <div style={{ ...skLine(70, 12) }} />
-                <div style={{ marginTop: 8, ...skLine(40, 18) }} />
-              </div>
-            </div>
+            <div style={skDonutRing()} />
           </div>
 
           <div style={{ flex: 1 }}>
-            {/* Session active text placeholder */}
-            <div style={{ ...skLine('100%', 14) }} />
-            <div style={{ marginTop: 8, ...skLine(120, 26) }} /> {/* timer */}
-            {/* Primary action button placeholder */}
+            <div style={skLine('100%', 14)} />
+            <div style={{ marginTop: 8, ...skLine(120, 26) }} />
+
             <div style={{ marginTop: 12, ...skBtn() }} />
-            {/* Refresh button placeholder */}
             <div style={{ marginTop: 10, ...skBtn() }} />
           </div>
         </div>
 
         {/* History */}
         <div style={{ marginTop: 18 }}>
-          <div style={{ ...skLine(70, 16) }} /> {/* History title */}
+          <div style={skLine(80, 16)} />
+
           <div style={{ marginTop: 10, display: 'grid', gap: 10 }}>
-            <div style={skHistoryCard()} />
-            <div style={skHistoryCard()} />
+            {[0, 1].map((i) => (
+              <div key={i} style={skHistoryCard()}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    alignItems: 'center',
+                  }}
+                >
+                  <div style={skLine(140, 14)} />
+                  <div style={skLine(90, 12)} />
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  <div style={skLine('90%', 12)} />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Pulse animation */}
         <style jsx global>{`
           @keyframes bpPulse {
             0% {
