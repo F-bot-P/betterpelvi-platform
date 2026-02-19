@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabase-browser';
+import DeviceSkeleton from '../_ui/DeviceSkeleton';
 
 type Chair = {
   id: string;
@@ -85,7 +86,7 @@ export default function ClinicDevicePage() {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
+            Authorization: ` ${session.access_token}`,
           },
           body: JSON.stringify({
             device_id: deviceId.trim() || null,
@@ -105,7 +106,7 @@ export default function ClinicDevicePage() {
     }
   }
 
-  if (loading) return <div style={panel()}>Loading…</div>;
+  if (loading) return <DeviceSkeleton />;
 
   return (
     <div style={panel()}>

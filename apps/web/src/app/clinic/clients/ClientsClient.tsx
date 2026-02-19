@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabaseBrowser } from '@/lib/supabase-browser';
-
+import ClientsSkeleton from '../_ui/ClientsSkeleton';
 type Client = {
   id: string;
   full_name: string;
@@ -55,34 +55,35 @@ export default function ClientsClient() {
     loadClients();
   }, []);
 
-  if (loading || error || clients.length === 0) {
+  if (loading) {
+    return <ClientsSkeleton />;
+  }
+
+  if (error) {
     return (
       <div className="bp-clients-page" style={page()}>
-        <style jsx global>
-          {GLOBAL_CSS}
-        </style>
-
         <div style={card()}>
           <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 10 }}>
             Clients
           </div>
-
-          {loading && <div style={muted()}>Loading clients…</div>}
-
-          {!loading && error && (
-            <div style={{ ...muted(), color: '#ef4444', fontWeight: 700 }}>
-              {error}
-            </div>
-          )}
-
-          {!loading && !error && clients.length === 0 && (
-            <div style={muted()}>No clients found</div>
-          )}
+          <div style={{ ...muted(), color: '#ef4444' }}>{error}</div>
         </div>
       </div>
     );
   }
 
+  if (clients.length === 0) {
+    return (
+      <div className="bp-clients-page" style={page()}>
+        <div style={card()}>
+          <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 10 }}>
+            Clients
+          </div>
+          <div style={muted()}>No clients found</div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="bp-clients-page" style={page()}>
       <style jsx global>

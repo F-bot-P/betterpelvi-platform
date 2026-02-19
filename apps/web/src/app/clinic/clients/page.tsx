@@ -378,7 +378,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabase-browser';
-
+import ClientsSkeleton from '../_ui/ClientsSkeleton';
 type Client = {
   id: string;
   full_name: string;
@@ -497,21 +497,10 @@ export default function ClinicClientsPage() {
   }
 
   // IMPORTANT: keep the SAME background even during initial loading
-  if (initialLoading) {
-    return (
-      <div className="bp-clinic-page" style={page()}>
-        <style jsx global>
-          {GLOBAL_CSS}
-        </style>
-        <div style={panel()}>
-          <div style={{ fontWeight: 800, color: 'rgba(4, 4, 4, 0.65)' }}>
-            Loading…
-          </div>
-        </div>
-      </div>
-    );
-  }
 
+  if (initialLoading) {
+    return <ClientsSkeleton />;
+  }
   return (
     <div className="bp-clinic-page" style={page()}>
       <style jsx global>
