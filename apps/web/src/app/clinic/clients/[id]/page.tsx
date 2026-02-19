@@ -151,7 +151,7 @@ export default function ClientDetailPage() {
 
   const [qrToken, setQrToken] = useState<string | null>(null);
   const qrPdfRef = useRef<HTMLDivElement>(null);
-
+  const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
   /* ---------- Auth Fetch ---------- */
 
   async function authedFetch(url: string, init?: RequestInit) {
@@ -537,6 +537,8 @@ export default function ClientDetailPage() {
                   value={`${webBase}/qr/${qrToken}`}
                   size={180}
                   level="H"
+                  // @ts-ignore - qrcode.react forwards ref to the canvas
+                  ref={qrCanvasRef}
                 />
               </div>
 
@@ -626,20 +628,31 @@ export default function ClientDetailPage() {
   }
 
   async function downloadQrPdf() {
-    if (!qrPdfRef.current || !client || !qrToken) return;
+    if (!client || !qrToken) return;
 
     try {
-      // 1) give the QR canvas a tiny moment to paint (fixes blank captures)
-      await new Promise((r) => setTimeout(r, 80));
+      const { jsPDF } = await import('jspdf');
 
-      // 2) capture the QR block as an image
-      const dataUrl = await htmlToImage.toPng(qrPdfRef.current, {
-        backgroundColor: '#ffffff',
-        pixelRatio: 3,
-        cacheBust: true,
-      });
+      // 1) Get PNG directly from the QR canvas (no html-to-image)
+      let qrPng: string | null = null;
 
-      // 3) create pdf
+      // Prefer ref
+      if (qrCanvasRef.current) {
+        qrPng = qrCanvasRef.current.toDataURL('image/png');
+      } else if (qrPdfRef.current) {
+        // Fallback: find canvas inside the wrapper
+        const c = qrPdfRef.current.querySelector(
+          'canvas',
+        ) as HTMLCanvasElement | null;
+        if (c) qrPng = c.toDataURL('image/png');
+      }
+
+      if (!qrPng) {
+        alert('QR not ready yet. Wait 1s and try again.');
+        return;
+      }
+
+      // 2) Create pdf
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'pt',
@@ -648,13 +661,13 @@ export default function ClientDetailPage() {
 
       const pageWidth = pdf.internal.pageSize.getWidth();
 
-      // 4) load logo
+      // 3) Load logo
       const logo = new Image();
       logo.crossOrigin = 'anonymous';
       logo.src = '/brand/logo-full.png';
       await logo.decode();
 
-      // 5) add logo
+      // 4) Logo (top, centered)
       const logoWidth = 117;
       const logoHeight = 74;
       pdf.addImage(
@@ -666,19 +679,12 @@ export default function ClientDetailPage() {
         logoHeight,
       );
 
-      // 6) add QR image
+      // 5) QR (main focus)
       const qrSize = 260;
       const qrY = 120;
-      pdf.addImage(
-        dataUrl,
-        'PNG',
-        (pageWidth - qrSize) / 2,
-        qrY,
-        qrSize,
-        qrSize,
-      );
+      pdf.addImage(qrPng, 'PNG', (pageWidth - qrSize) / 2, qrY, qrSize, qrSize);
 
-      // 7) name
+      // 6) Client name
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(11);
       pdf.setTextColor(40, 40, 40);
@@ -686,7 +692,7 @@ export default function ClientDetailPage() {
         align: 'center',
       });
 
-      // 8) url
+      // 7) URL
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(9);
       pdf.setTextColor(80, 80, 80);
@@ -694,7 +700,7 @@ export default function ClientDetailPage() {
         align: 'center',
       });
 
-      // 9) save
+      // 8) Save
       const safeName = client.full_name.replace(/[^\w\-]+/g, '-');
       pdf.save(`${safeName}-QR.pdf`);
     } catch (e) {

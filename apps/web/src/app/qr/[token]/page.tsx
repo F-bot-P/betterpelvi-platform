@@ -260,19 +260,7 @@ export default function QrClientPage() {
   // UI
   // -------------------------
   if (loading) {
-    return (
-      <div
-        style={{
-          padding: 18,
-          display: 'grid',
-          placeItems: 'center',
-          minHeight: '70vh',
-          backgroundColor: '#ffffff',
-        }}
-      >
-        <div style={{ color: '#080808' }}>Loading…</div>
-      </div>
-    );
+    return <QrClientSkeleton />;
   }
 
   if (!client) {
@@ -329,7 +317,7 @@ export default function QrClientPage() {
         </div>
         {/* Logo is a sibling, not inside flex */}
         <img
-         className="bp-logo"
+          className="bp-logo"
           src="/brand/logo-full.png"
           alt="BetterPelvi"
           style={{
@@ -524,7 +512,186 @@ export default function QrClientPage() {
     </div>
   );
 }
+function QrClientSkeleton() {
+  return (
+    <div
+      style={{
+        padding: 18,
+        maxWidth: 560,
+        margin: '0 auto',
+      }}
+    >
+      <div style={panel()}>
+        {/* Header row (client name placeholder) */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: 12,
+            alignItems: 'baseline',
+          }}
+        >
+          <div style={{ ...skLine(120, 20) }} />
+        </div>
 
+        {/* Logo placeholder exactly where your logo is */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 14,
+            right: 34,
+            height: 88,
+            width: 190,
+            borderRadius: 12,
+            background: '#e5e7eb',
+            animation: 'bpPulse 1.1s ease-in-out infinite',
+          }}
+        />
+
+        {/* Credits */}
+        <div style={{ marginTop: 14 }}>
+          <div style={{ ...skLine(70, 14) }} /> {/* Sessions */}
+          <div style={{ marginTop: 8, ...skLine(160, 14) }} /> {/* Used x/y */}
+          <div style={{ marginTop: 10, ...skLine(220, 30) }} />{' '}
+          {/* Remaining: */}
+        </div>
+
+        {/* Donut + right column */}
+        <div
+          style={{
+            marginTop: 12,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+          }}
+        >
+          {/* Donut skeleton (ring + inner) */}
+          <div style={skDonutWrap()}>
+            <div style={skDonutRing()}>
+              <div style={skDonutInner()}>
+                <div style={{ ...skLine(70, 12) }} />
+                <div style={{ marginTop: 8, ...skLine(40, 18) }} />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ flex: 1 }}>
+            {/* Session active text placeholder */}
+            <div style={{ ...skLine('100%', 14) }} />
+            <div style={{ marginTop: 8, ...skLine(120, 26) }} /> {/* timer */}
+            {/* Primary action button placeholder */}
+            <div style={{ marginTop: 12, ...skBtn() }} />
+            {/* Refresh button placeholder */}
+            <div style={{ marginTop: 10, ...skBtn() }} />
+          </div>
+        </div>
+
+        {/* History */}
+        <div style={{ marginTop: 18 }}>
+          <div style={{ ...skLine(70, 16) }} /> {/* History title */}
+          <div style={{ marginTop: 10, display: 'grid', gap: 10 }}>
+            <div style={skHistoryCard()} />
+            <div style={skHistoryCard()} />
+          </div>
+        </div>
+
+        {/* Pulse animation */}
+        <style jsx global>{`
+          @keyframes bpPulse {
+            0% {
+              opacity: 0.55;
+            }
+            50% {
+              opacity: 1;
+            }
+            100% {
+              opacity: 0.55;
+            }
+          }
+        `}</style>
+      </div>
+    </div>
+  );
+}
+
+/* ===== Skeleton helpers ===== */
+
+function skBase(): React.CSSProperties {
+  return {
+    background: '#e5e7eb',
+    borderRadius: 10,
+    animation: 'bpPulse 1.1s ease-in-out infinite',
+  };
+}
+
+function skLine(width: number | string, height: number): React.CSSProperties {
+  return {
+    ...skBase(),
+    width,
+    height,
+  };
+}
+
+function skBtn(): React.CSSProperties {
+  return {
+    ...skBase(),
+    height: 44,
+    borderRadius: 10,
+  };
+}
+
+function skDonutWrap(): React.CSSProperties {
+  return {
+    width: 120,
+    height: 120,
+    borderRadius: 999,
+    padding: 10,
+  };
+}
+
+function skDonutRing(): React.CSSProperties {
+  // Looks like a faint ring, similar to your conic-gradient donut
+  return {
+    width: '100%',
+    height: '100%',
+    borderRadius: 999,
+    background: `conic-gradient(
+      #e5e7eb 0deg,
+      #d1d5db 140deg,
+      #e5e7eb 280deg,
+      #d1d5db 360deg
+    )`,
+    animation: 'bpPulse 1.1s ease-in-out infinite',
+    padding: 10,
+    boxSizing: 'border-box',
+  };
+}
+
+function skDonutInner(): React.CSSProperties {
+  return {
+    width: '100%',
+    height: '100%',
+    borderRadius: 999,
+    background: 'rgba(157, 155, 155, 0.25)',
+    border: '1px solid rgba(154, 153, 153, 0.12)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    gap: 2,
+    boxSizing: 'border-box',
+    animation: 'bpPulse 1.1s ease-in-out infinite',
+  };
+}
+
+function skHistoryCard(): React.CSSProperties {
+  return {
+    border: '1px solid #e5e7eb',
+    background: '#ffffff',
+    borderRadius: 12,
+    padding: 12,
+  };
+}
 /* styles */
 function panel(): React.CSSProperties {
   return {
@@ -544,8 +711,8 @@ function btnGhost(): React.CSSProperties {
     padding: '10px 12px',
     borderRadius: 10,
     border: '1px solid rgba(255,255,255,0.14)',
-    background: '#696a6d',
-    color: '',
+    background: '#a0a1a3',
+    color: '#000000',
     cursor: 'pointer',
     fontWeight: 800,
     width: '100%',
