@@ -501,7 +501,7 @@ export default function ClinicClientsPage() {
     return (
       <div className="bp-clinic-page" style={page()}>
         <style jsx global>
-          {globalCss()}
+          {GLOBAL_CSS}
         </style>
         <div style={panel()}>
           <div style={{ fontWeight: 800, color: 'rgba(4, 4, 4, 0.65)' }}>
@@ -515,7 +515,7 @@ export default function ClinicClientsPage() {
   return (
     <div className="bp-clinic-page" style={page()}>
       <style jsx global>
-        {globalCss()}
+        {GLOBAL_CSS}
       </style>
 
       {/* Top bar */}
@@ -684,45 +684,6 @@ export default function ClinicClientsPage() {
 }
 
 /** Global CSS: fixes Safari back/forward white flash + makes mobile layout good */
-function globalCss() {
-  return `
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: #f8f8fa;
-      min-height: 100%;
-    }
-
-    /* Prevent iOS rubber-band showing white/black gaps on history back/forward */
-    body { overscroll-behavior-y: none; }
-
-    /* Mobile: stack columns + wrap buttons */
-    @media (max-width: 860px) {
-      .bp-main-grid {
-        grid-template-columns: 1fr !important;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .bp-topbar {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 10px !important;
-      }
-      .bp-topbar-actions {
-        justify-content: space-between !important;
-        flex-wrap: wrap !important;
-        gap: 8px !important;
-      }
-      .bp-create-actions {
-        flex-direction: column !important;
-      }
-      .bp-create-actions > button {
-        width: 100% !important;
-      }
-    }
-  `;
-}
 
 function page(): React.CSSProperties {
   return {
@@ -733,7 +694,43 @@ function page(): React.CSSProperties {
       'max(12px, env(safe-area-inset-top)) 14px max(12px, env(safe-area-inset-bottom))',
   };
 }
+const GLOBAL_CSS = `
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #f8f8fa;
+    min-height: 100%;
+  }
 
+  /* Prevent iOS rubber-band showing white/black gaps on history back/forward */
+  body { overscroll-behavior-y: none; }
+
+  /* Mobile: stack columns + wrap buttons */
+  @media (max-width: 860px) {
+    .bp-main-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .bp-topbar {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 10px !important;
+    }
+    .bp-topbar-actions {
+      justify-content: space-between !important;
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+    }
+    .bp-create-actions {
+      flex-direction: column !important;
+    }
+    .bp-create-actions > button {
+      width: 100% !important;
+    }
+  }
+`;
 function topbar(): React.CSSProperties {
   return {
     display: 'flex',

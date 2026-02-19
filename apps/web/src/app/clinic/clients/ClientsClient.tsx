@@ -59,7 +59,7 @@ export default function ClientsClient() {
     return (
       <div className="bp-clients-page" style={page()}>
         <style jsx global>
-          {globalCss()}
+          {GLOBAL_CSS}
         </style>
 
         <div style={card()}>
@@ -86,7 +86,7 @@ export default function ClientsClient() {
   return (
     <div className="bp-clients-page" style={page()}>
       <style jsx global>
-        {globalCss()}
+        {GLOBAL_CSS}
       </style>
 
       <div style={container()}>
@@ -151,39 +151,30 @@ export default function ClientsClient() {
   );
 }
 
-function globalCss() {
-  return `
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: #f8f8fa;
-      min-height: 100%;
-    }
+const GLOBAL_CSS = `
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #f8f8fa;
+    min-height: 100%;
+  }
 
-    /* Prevent iOS rubber-band black */
-    body { overscroll-behavior-y: none; }
+  /* Prevent iOS rubber-band black */
+  body { overscroll-behavior-y: none; }
 
-    /* ✅ Make the name LOOK tappable on mobile */
-    .bp-client-name-link {
-      cursor: pointer;
-    }
-    .bp-client-name-link:active {
-      opacity: 0.7;
-    }
-    .bp-client-name-link:hover {
-      text-decoration: underline;
-    }
+  /* Make the name LOOK tappable on mobile */
+  .bp-client-name-link { cursor: pointer; }
+  .bp-client-name-link:active { opacity: 0.7; }
+  .bp-client-name-link:hover { text-decoration: underline; }
 
-    @media (max-width: 640px) {
-      .bp-clients-header {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 10px !important;
-      }
+  @media (max-width: 640px) {
+    .bp-clients-header {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 10px !important;
     }
-  `;
-}
-
+  }
+`;
 function page(): React.CSSProperties {
   return {
     minHeight: '100svh',
