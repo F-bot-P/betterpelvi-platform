@@ -86,7 +86,7 @@ export default function ClinicDevicePage() {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: ` ${session.access_token}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({
             device_id: deviceId.trim() || null,
