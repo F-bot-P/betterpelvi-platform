@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabase-browser';
 import { QRCodeCanvas } from 'qrcode.react';
-import { jsPDF } from 'jspdf';
-import * as htmlToImage from 'html-to-image';
+// import { jsPDF } from 'jspdf';
+// import * as htmlToImage from 'html-to-image';
 
 const CORAL = '#f15b5b';
 const GLOBAL_CSS = `
@@ -641,14 +641,18 @@ export default function ClientDetailPage() {
 
   async function downloadQrPdf() {
     if (!qrPdfRef.current || !client || !qrToken) return;
+
     try {
-      // 1. Convert QR block to image
+      const [{ jsPDF }, htmlToImage] = await Promise.all([
+        import('jspdf'),
+        import('html-to-image'),
+      ]);
+
       const dataUrl = await htmlToImage.toPng(qrPdfRef.current, {
         backgroundColor: '#ffffff',
         pixelRatio: 2,
       });
 
-      // 2. Create PDF
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'pt',
