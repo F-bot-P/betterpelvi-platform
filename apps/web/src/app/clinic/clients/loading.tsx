@@ -56,7 +56,6 @@
 // }
 import ClientsSkeleton from '../_ui/ClientsSkeleton';
 
-
 export default function Loading() {
   return <ClientsSkeleton />;
 }
