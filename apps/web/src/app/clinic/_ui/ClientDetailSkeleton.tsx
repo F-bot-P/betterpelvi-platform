@@ -23,8 +23,15 @@ export default function ClientDetailSkeleton() {
           }}
         >
           <div
-            style={{ height: 18, width: 180, borderRadius: 10, ...shimmer() }}
-          />
+            style={{
+              fontWeight: 900,
+              fontSize: 26,
+              color: '#111827',
+              lineHeight: 1,
+            }}
+          >
+            Clinic Dashboard
+          </div>
           <div
             className="bp-client-skel-actions"
             style={{ display: 'flex', gap: 10 }}

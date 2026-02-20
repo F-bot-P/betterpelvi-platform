@@ -93,13 +93,22 @@ export default function DeviceSkeleton() {
       style={{
         minHeight: '100svh',
         padding: 18,
+        boxSizing: 'border-box',
+        overflowX: 'hidden',
         background:
           'radial-gradient(900px 400px at 50% 0%, rgba(231,101,101,0.12), transparent 60%), #f8f8fa',
         display: 'grid',
         placeItems: 'start center',
       }}
     >
-      <div style={{ width: 'min(980px, 92vw)' }}>
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 720,
+          margin: '0 auto',
+          boxSizing: 'border-box',
+        }}
+      >
         {/* Header row */}
         <div
           style={{
