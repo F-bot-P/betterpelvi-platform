@@ -47,9 +47,7 @@ export default function ClientDetailSkeleton() {
                   fontSize: 20,
                   color: '#111827',
                 }}
-              >
-                Clinic Dashboard
-              </div>
+              ></div>
             </div>
           }
           <div
