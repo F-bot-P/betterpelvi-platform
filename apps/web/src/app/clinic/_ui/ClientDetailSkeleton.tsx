@@ -20,6 +20,8 @@ export default function ClientDetailSkeleton() {
             alignItems: 'center',
             gap: 12,
             marginBottom: 18,
+            width: '100%',
+            textAlign: 'left',
           }}
         >
           {
@@ -33,8 +35,12 @@ export default function ClientDetailSkeleton() {
           >
             Clinic Dashboard
           </div> */
-            <div style={{ fontWeight: 900, fontSize: 20, color: '#111827' }}>
-              Clinic Dashboard
+            <div
+              style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}
+            >
+              <div style={{ fontWeight: 900, fontSize: 20, color: '#111827' }}>
+                Clinic Dashboard
+              </div>
             </div>
           }
           <div
