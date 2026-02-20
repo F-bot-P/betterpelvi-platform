@@ -22,7 +22,8 @@ export default function ClientDetailSkeleton() {
             marginBottom: 18,
           }}
         >
-          <div
+          {
+            /* <div
             style={{
               fontWeight: 900,
               fontSize: 26,
@@ -31,7 +32,11 @@ export default function ClientDetailSkeleton() {
             }}
           >
             Clinic Dashboard
-          </div>
+          </div> */
+            <div style={{ fontWeight: 900, fontSize: 20, color: '#111827' }}>
+              Clinic Dashboard
+            </div>
+          }
           <div
             className="bp-client-skel-actions"
             style={{ display: 'flex', gap: 10 }}
