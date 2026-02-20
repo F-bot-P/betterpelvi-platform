@@ -10,7 +10,7 @@ export default function ClientDetailSkeleton() {
           'radial-gradient(900px 400px at 50% 0%, rgba(231, 101, 101, 0.14), transparent 60%), #f8f8fa',
       }}
     >
-      <div style={{ maxWidth: 980, margin: '0 auto' }}>
+      <div style={{ maxWidth: 980, margin: '0 auto', textAlign: 'left' }}>
         {/* Header */}
         <div
           className="bp-client-skel-header"
@@ -39,7 +39,7 @@ export default function ClientDetailSkeleton() {
               style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}
             >
               <div style={{ fontWeight: 900, fontSize: 20, color: '#111827' }}>
-                Clinic Dashboard
+                Clinic Dashboard F
               </div>
             </div>
           }
