@@ -8,12 +8,6 @@ export type ShellyCommandTarget = {
   topicPrefix?: string | null;
 };
 
-type PendingRpc = {
-  resolve: () => void;
-  reject: (error: Error) => void;
-  timeout: ReturnType<typeof setTimeout>;
-};
-
 type MqttCommand = {
   topic: string;
   payload: string;
@@ -31,20 +25,14 @@ export class ShellyMqttService implements OnModuleInit, OnModuleDestroy {
   );
   private readonly publishTimeoutMs = this.parseIntEnv(
     process.env.MQTT_PUBLISH_TIMEOUT_MS,
-    6000,
+    4000,
   );
   private readonly publishRetries = Math.max(
     1,
-    this.parseIntEnv(process.env.MQTT_PUBLISH_RETRIES, 3),
+    this.parseIntEnv(process.env.MQTT_PUBLISH_RETRIES, 2),
   );
   private readonly rejectUnauthorized =
     (process.env.MQTT_REJECT_UNAUTHORIZED ?? 'true').toLowerCase() !== 'false';
-  private readonly rpcSource =
-    process.env.MQTT_RPC_SOURCE?.trim() ?? `hebimed-backend-${process.pid}`;
-  private readonly rpcResponseTopic = `${this.rpcSource}/rpc`;
-
-  private readonly pendingRpc = new Map<number, PendingRpc>();
-  private rpcRequestCounter = 0;
 
   onModuleInit() {
     if (!this.mqttUrl) {
@@ -64,7 +52,6 @@ export class ShellyMqttService implements OnModuleInit, OnModuleDestroy {
 
     this.client.on('connect', () => {
       console.log(`[MQTT] Connected: ${this.maskBroker(this.mqttUrl)}`);
-      this.subscribeRpcResponses();
     });
 
     this.client.on('reconnect', () => {
@@ -82,19 +69,9 @@ export class ShellyMqttService implements OnModuleInit, OnModuleDestroy {
     this.client.on('error', (err) => {
       console.error('[MQTT] Error:', err.message);
     });
-
-    this.client.on('message', (topic, payload) => {
-      this.handleIncomingMessage(topic, payload);
-    });
   }
 
   onModuleDestroy() {
-    for (const [, pending] of this.pendingRpc) {
-      clearTimeout(pending.timeout);
-      pending.reject(new Error('MQTT service stopped before receiving RPC response.'));
-    }
-    this.pendingRpc.clear();
-
     if (this.client) {
       this.client.end(true);
       this.client = null;
@@ -132,164 +109,102 @@ export class ShellyMqttService implements OnModuleInit, OnModuleDestroy {
 
   private async setPowerState(target: ShellyCommandTarget, isOn: boolean) {
     const relay = this.normalizeRelay(target.relay);
-    const desiredState = isOn ? 'on' : 'off';
 
     if (!target.deviceId && !target.mqttTopic && !target.topicPrefix) {
       throw new Error('Missing Shelly MQTT configuration (device_id/topic_prefix/mqtt_topic).');
     }
 
+    await this.waitUntilConnected();
+
+    const commands = this.buildCommandBurst(target, relay, isOn);
+
+    let successCount = 0;
     const errors: string[] = [];
 
-    // Shelly Gen2/Gen3 RPC gives a response, so it is the most reliable first attempt.
-    if (target.deviceId) {
-      try {
-        await this.publishRpcSwitch(target.deviceId, relay, isOn);
-        console.log(
-          `[MQTT] RPC acknowledged ${desiredState.toUpperCase()} for ${target.deviceId} relay ${relay}`,
-        );
-        return;
-      } catch (error: any) {
-        errors.push(`RPC: ${error?.message ?? String(error)}`);
-      }
-    }
-
-    const fallbackCommands = this.buildFallbackCommands(target, desiredState, relay);
-
-    for (const command of fallbackCommands) {
+    for (const command of commands) {
       try {
         await this.publishWithRetry(command.topic, command.payload);
-        console.log(
-          `[MQTT] Command published ${desiredState.toUpperCase()} to topic ${command.topic}`,
-        );
-        return;
+        successCount += 1;
       } catch (error: any) {
         errors.push(`${command.topic}: ${error?.message ?? String(error)}`);
       }
     }
 
-    throw new Error(`Unable to send MQTT ${desiredState.toUpperCase()} command. ${errors.join(' | ')}`);
+    if (successCount === 0) {
+      throw new Error(`Unable to publish MQTT power commands. ${errors.join(' | ')}`);
+    }
+
+    console.log(
+      `[MQTT] ${isOn ? 'ON' : 'OFF'} burst sent (${successCount}/${commands.length} publishes acknowledged).`,
+    );
   }
 
-  private buildFallbackCommands(
+  private buildCommandBurst(
     target: ShellyCommandTarget,
-    payload: string,
     relay: number,
+    isOn: boolean,
   ): MqttCommand[] {
-    const commands: MqttCommand[] = [];
-    const dedupe = new Set<string>();
+    const payloadText = isOn ? 'on' : 'off';
+    const payloadJson = JSON.stringify({ on: isOn });
 
-    const add = (topic: string, topicPayload = payload) => {
+    const commands: MqttCommand[] = [];
+    const seen = new Set<string>();
+
+    const add = (topic: string, payload: string) => {
+      const key = `${topic}::${payload}`;
       const cleanTopic = topic.trim();
-      if (!cleanTopic || dedupe.has(cleanTopic)) return;
-      dedupe.add(cleanTopic);
-      commands.push({ topic: cleanTopic, payload: topicPayload });
+      if (!cleanTopic || seen.has(key)) return;
+      seen.add(key);
+      commands.push({ topic: cleanTopic, payload });
     };
 
-    if (target.mqttTopic) {
-      add(target.mqttTopic);
-      return commands;
-    }
-
     const prefix = target.topicPrefix || target.deviceId || null;
-    if (prefix) {
-      // Shelly Gen2/Gen3 control topic when MQTT control is enabled.
-      add(`${prefix}/command/switch:${relay}`);
-    }
 
     if (target.deviceId) {
-      // Shelly Gen1 legacy topic.
-      add(`shellies/${target.deviceId}/relay/${relay}/command`);
+      // Shelly Gen2/Gen3 RPC format (fire-and-forget; some firmwares don't reply on src/rpc).
+      add(
+        `${target.deviceId}/rpc`,
+        JSON.stringify({
+          id: Date.now(),
+          src: 'hebimed-backend',
+          method: 'Switch.Set',
+          params: { id: relay, on: isOn },
+        }),
+      );
+
+      // Some compatibility setups use shellies/<id>/rpc.
+      add(
+        `shellies/${target.deviceId}/rpc`,
+        JSON.stringify({
+          id: Date.now() + 1,
+          src: 'hebimed-backend',
+          method: 'Switch.Set',
+          params: { id: relay, on: isOn },
+        }),
+      );
+
+      // Legacy Gen1 command topic.
+      add(`shellies/${target.deviceId}/relay/${relay}/command`, payloadText);
+      // Legacy compatibility topic used by some firmwares.
+      add(`shellies/${target.deviceId}/command`, payloadText);
+    }
+
+    if (prefix) {
+      // Gen2/Gen3 simple command topic.
+      add(`${prefix}/command/switch:${relay}`, payloadText);
+      // Some versions accept JSON payload on the same topic.
+      add(`${prefix}/command/switch:${relay}`, payloadJson);
+      // Some devices map simple command topic without component suffix.
+      add(`${prefix}/command`, payloadText);
+    }
+
+    if (target.mqttTopic) {
+      // Explicit override from DB always included.
+      add(target.mqttTopic, payloadText);
+      add(target.mqttTopic, payloadJson);
     }
 
     return commands;
-  }
-
-  private async publishRpcSwitch(deviceId: string, relay: number, isOn: boolean) {
-    const rpcId = this.nextRpcId();
-    const waitForResponse = this.waitForRpcResponse(rpcId);
-    waitForResponse.catch(() => undefined);
-
-    const payload = JSON.stringify({
-      id: rpcId,
-      src: this.rpcSource,
-      method: 'Switch.Set',
-      params: { id: relay, on: isOn },
-    });
-
-    try {
-      await this.publishWithRetry(`${deviceId}/rpc`, payload);
-      await waitForResponse;
-    } catch (error) {
-      this.cancelPendingRpc(rpcId, `RPC command failed for ${deviceId}`);
-      throw error;
-    }
-  }
-
-  private waitForRpcResponse(id: number): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        this.pendingRpc.delete(id);
-        reject(new Error(`Timed out waiting for RPC response ${id}.`));
-      }, this.publishTimeoutMs);
-
-      this.pendingRpc.set(id, {
-        resolve: () => {
-          clearTimeout(timeout);
-          this.pendingRpc.delete(id);
-          resolve();
-        },
-        reject: (error) => {
-          clearTimeout(timeout);
-          this.pendingRpc.delete(id);
-          reject(error);
-        },
-        timeout,
-      });
-    });
-  }
-
-  private cancelPendingRpc(id: number, reason: string) {
-    const pending = this.pendingRpc.get(id);
-    if (!pending) return;
-
-    pending.reject(new Error(reason));
-  }
-
-  private handleIncomingMessage(topic: string, payload: Buffer) {
-    if (topic !== this.rpcResponseTopic) return;
-
-    let message: any;
-    try {
-      message = JSON.parse(payload.toString('utf8'));
-    } catch {
-      return;
-    }
-
-    if (typeof message?.id !== 'number') return;
-
-    const pending = this.pendingRpc.get(message.id);
-    if (!pending) return;
-
-    if (message.error) {
-      pending.reject(new Error(JSON.stringify(message.error)));
-      return;
-    }
-
-    pending.resolve();
-  }
-
-  private subscribeRpcResponses() {
-    if (!this.client?.connected) return;
-
-    this.client.subscribe(this.rpcResponseTopic, { qos: 1 }, (err) => {
-      if (err) {
-        console.error(
-          `[MQTT] Failed subscribing to ${this.rpcResponseTopic}: ${err.message}`,
-        );
-      } else {
-        console.log(`[MQTT] Listening for RPC responses on ${this.rpcResponseTopic}`);
-      }
-    });
   }
 
   private async publishWithRetry(topic: string, payload: string) {
@@ -312,7 +227,6 @@ export class ShellyMqttService implements OnModuleInit, OnModuleDestroy {
 
   private async publishOnce(topic: string, payload: string) {
     const client = this.getClientOrThrow();
-    await this.waitUntilConnected();
 
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
@@ -382,11 +296,6 @@ export class ShellyMqttService implements OnModuleInit, OnModuleDestroy {
     return n;
   }
 
-  private nextRpcId() {
-    this.rpcRequestCounter = (this.rpcRequestCounter + 1) % 1_000_000_000;
-    return this.rpcRequestCounter;
-  }
-
   private parseIntEnv(raw: string | undefined, fallback: number) {
     const value = Number(raw);
     return Number.isFinite(value) && value > 0 ? value : fallback;
@@ -401,5 +310,3 @@ export class ShellyMqttService implements OnModuleInit, OnModuleDestroy {
     }
   }
 }
-
-
