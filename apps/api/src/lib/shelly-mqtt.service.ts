@@ -158,7 +158,15 @@ export class ShellyMqttService implements OnModuleInit, OnModuleDestroy {
       commands.push({ topic: cleanTopic, payload });
     };
 
-    const prefix = target.topicPrefix || target.deviceId || null;
+    const prefixCandidates = new Set<string>();
+    if (target.topicPrefix) prefixCandidates.add(target.topicPrefix);
+    if (target.deviceId) prefixCandidates.add(target.deviceId);
+
+    // Shelly Plug S Gen3 often uses sg3_<mac> as MQTT topic prefix.
+    const sg3Match = target.deviceId?.match(/^shellyplugsg3-(.+)$/i);
+    if (sg3Match?.[1]) {
+      prefixCandidates.add(`sg3_${sg3Match[1].toLowerCase()}`);
+    }
 
     if (target.deviceId) {
       // Shelly Gen2/Gen3 RPC format (fire-and-forget; some firmwares don't reply on src/rpc).
@@ -189,7 +197,7 @@ export class ShellyMqttService implements OnModuleInit, OnModuleDestroy {
       add(`shellies/${target.deviceId}/command`, payloadText);
     }
 
-    if (prefix) {
+    for (const prefix of prefixCandidates) {
       // Gen2/Gen3 simple command topic.
       add(`${prefix}/command/switch:${relay}`, payloadText);
       // Some versions accept JSON payload on the same topic.
@@ -310,3 +318,4 @@ export class ShellyMqttService implements OnModuleInit, OnModuleDestroy {
     }
   }
 }
+
