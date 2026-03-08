@@ -8,7 +8,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { QrModule } from './qr/qr.module';
 import { ChairsModule } from './chairs/chairs.module';
-import { ShellyMqttService } from './lib/shelly-mqtt.service';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -23,7 +22,5 @@ import { HealthController } from './health.controller';
     ChairsModule,
   ],
   controllers: [HealthController],
-
-  providers: [ShellyMqttService],
 })
 export class AppModule {}

@@ -10,6 +10,9 @@ type Chair = {
   id: string;
   name: string;
   device_id?: string | null;
+  mqtt_topic?: string | null;
+  topic_prefix?: string | null;
+  shelly_relay?: number | null;
 };
 
 export default function ClinicDevicePage() {
@@ -22,6 +25,9 @@ export default function ClinicDevicePage() {
   const [chairId, setChairId] = useState('');
 
   const [deviceId, setDeviceId] = useState('');
+  const [topicPrefix, setTopicPrefix] = useState('');
+  const [mqttTopic, setMqttTopic] = useState('');
+  const [relay, setRelay] = useState('0');
 
   async function loadChairs() {
     setLoading(true);
@@ -48,11 +54,9 @@ export default function ClinicDevicePage() {
 
       const first = arr[0];
       if (first) {
-        setChairId(first.id);
-        setDeviceId(first.device_id ?? '');
+        applyChairSelection(first);
       } else {
-        setChairId('');
-        setDeviceId('');
+        clearForm();
       }
     } finally {
       setLoading(false);
@@ -64,11 +68,26 @@ export default function ClinicDevicePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function clearForm() {
+    setChairId('');
+    setDeviceId('');
+    setTopicPrefix('');
+    setMqttTopic('');
+    setRelay('0');
+  }
+
+  function applyChairSelection(chair: Chair) {
+    setChairId(chair.id);
+    setDeviceId(chair.device_id ?? '');
+    setTopicPrefix(chair.topic_prefix ?? '');
+    setMqttTopic(chair.mqtt_topic ?? '');
+    setRelay(String(chair.shelly_relay ?? 0));
+  }
+
   function onSelectChair(id: string) {
-    setChairId(id);
-    const c = chairs.find((x) => x.id === id);
-    if (!c) return;
-    setDeviceId(c.device_id ?? '');
+    const selected = chairs.find((x) => x.id === id);
+    if (!selected) return;
+    applyChairSelection(selected);
   }
 
   async function save() {
@@ -77,6 +96,11 @@ export default function ClinicDevicePage() {
     if (!session) return router.replace('/clinic/login');
 
     if (!chairId) return alert('No chair selected');
+
+    const relayNumber = Number(relay);
+    if (!Number.isInteger(relayNumber) || relayNumber < 0 || relayNumber > 4) {
+      return alert('Relay must be an integer between 0 and 4.');
+    }
 
     setSaving(true);
     try {
@@ -90,6 +114,9 @@ export default function ClinicDevicePage() {
           },
           body: JSON.stringify({
             device_id: deviceId.trim() || null,
+            topic_prefix: topicPrefix.trim() || null,
+            mqtt_topic: mqttTopic.trim() || null,
+            shelly_relay: relayNumber,
           }),
         },
       );
@@ -138,26 +165,56 @@ export default function ClinicDevicePage() {
           ))}
         </select>
 
-        <label style={label()}>Device ID (Shelly device ID)</label>
+        <label style={label()}>Device ID (Shelly MQTT device id)</label>
         <input
           style={input()}
           value={deviceId}
           onChange={(e) => setDeviceId(e.target.value)}
-          placeholder="e.g. shellyplus1pm-xxxxxxxxxxxx"
+          placeholder="e.g. shellyplugsg3-8cbfeaa036f4"
+        />
+
+        <label style={label()}>Topic Prefix (optional)</label>
+        <input
+          style={input()}
+          value={topicPrefix}
+          onChange={(e) => setTopicPrefix(e.target.value)}
+          placeholder="e.g. shellyplugsg3-8cbfeaa036f4"
+        />
+
+        <label style={label()}>MQTT Command Topic (optional override)</label>
+        <input
+          style={input()}
+          value={mqttTopic}
+          onChange={(e) => setMqttTopic(e.target.value)}
+          placeholder="e.g. shellyplugsg3-8cbfeaa036f4/command/switch:0"
+        />
+
+        <label style={label()}>Relay (0-4)</label>
+        <input
+          style={input()}
+          value={relay}
+          onChange={(e) => setRelay(e.target.value)}
+          inputMode="numeric"
+          placeholder="0"
         />
 
         <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
           <button style={btnPrimary()} onClick={save} disabled={saving}>
-            {saving ? 'Saving…' : 'Confirm'}
+            {saving ? 'Saving...' : 'Confirm'}
           </button>
           <button style={btnGhost()} onClick={loadChairs} disabled={saving}>
             Refresh
           </button>
         </div>
 
-        <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.55)', marginTop: 6 }}>
-          Tip: leaving Device ID empty and pressing Confirm will store{' '}
-          <b>null</b> (unpair).
+        <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.62)', marginTop: 6 }}>
+          Simulation steps (phone charger):
+          <br />1) Plug a phone charger into the Shelly plug.
+          <br />2) Save the chair with Device ID
+          <b> shellyplugsg3-8cbfeaa036f4 </b> (or your exact device id).
+          <br />3) Start session from dashboard or QR page -&gt; charger should turn ON.
+          <br />4) End session manually -&gt; charger should turn OFF immediately.
+          <br />5) Leave one session running -&gt; it should auto-end and turn OFF at 28 minutes.
         </div>
       </div>
     </div>
