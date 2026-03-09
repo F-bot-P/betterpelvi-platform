@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { supabaseAdmin } from '../lib/supabase-admin';
 import { randomUUID } from 'crypto';
+import { SessionsService } from '../sessions/sessions.service';
 
 type CreateClientInput = {
   full_name: string;
@@ -13,7 +14,7 @@ type CreateClientInput = {
   phone?: string;
   email?: string;
 
-  // sessions booked on creation (10,20,30…)
+  // sessions booked on creation (10,20,30...)
   initial_sessions?: number;
 };
 
@@ -34,6 +35,8 @@ function normalizeCredits(rel: any): CreditsRow {
 
 @Injectable()
 export class ClientsService {
+  constructor(private readonly sessions: SessionsService) {}
+
   // =========================================================
   // LIST + SEARCH (CLINIC DASHBOARD)
   // =========================================================
@@ -92,8 +95,6 @@ export class ClientsService {
     if (!Number.isFinite(total) || total < 0) {
       throw new BadRequestException('initial_sessions must be >= 0');
     }
-    // Optional business rule:
-    // if (total % 10 !== 0) throw new BadRequestException('Sessions must be in 10s');
 
     const qrToken = randomUUID();
 
@@ -146,8 +147,7 @@ export class ClientsService {
       throw new ForbiddenException('Client not in your clinic');
 
     const patch: any = {};
-    if (input.full_name !== undefined)
-      patch.full_name = input.full_name?.trim();
+    if (input.full_name !== undefined) patch.full_name = input.full_name?.trim();
     if (input.username !== undefined)
       patch.username = input.username?.trim() ?? null;
     if (input.location !== undefined)
@@ -169,6 +169,88 @@ export class ClientsService {
   }
 
   // =========================================================
+  // DELETE CLIENT (+ linked session/power/auth cleanup)
+  // =========================================================
+  async deleteClient(clinicId: string, clientId: string) {
+    const { data: existing, error: existingError } = await supabaseAdmin
+      .from('clients')
+      .select('id, clinic_id, auth_user_id, full_name')
+      .eq('id', clientId)
+      .single();
+
+    if (existingError || !existing) {
+      throw new BadRequestException('Client not found');
+    }
+    if (existing.clinic_id !== clinicId) {
+      throw new ForbiddenException('Client not in your clinic');
+    }
+
+    // Safety: stop any active sessions first so chair power is turned OFF.
+    const { data: activeSessions, error: activeErr } = await supabaseAdmin
+      .from('sessions')
+      .select('id')
+      .eq('clinic_id', clinicId)
+      .eq('client_id', clientId)
+      .eq('status', 'active');
+
+    if (activeErr) throw new BadRequestException(activeErr.message);
+
+    for (const row of activeSessions ?? []) {
+      await this.sessions.stopAsClinic(clinicId, row.id);
+    }
+
+    const linkedAuthUserId = existing.auth_user_id as string | null;
+
+    if (linkedAuthUserId) {
+      const { data: profile, error: profileReadError } = await supabaseAdmin
+        .from('profiles')
+        .select('id, role')
+        .eq('id', linkedAuthUserId)
+        .maybeSingle();
+
+      if (profileReadError) {
+        throw new BadRequestException(profileReadError.message);
+      }
+
+      // Only delete auth account when profile role is client.
+      if (profile?.role === 'client') {
+        const { error: profileDeleteError } = await supabaseAdmin
+          .from('profiles')
+          .delete()
+          .eq('id', linkedAuthUserId);
+
+        if (profileDeleteError) {
+          throw new BadRequestException(profileDeleteError.message);
+        }
+
+        const { error: authDeleteError } =
+          await supabaseAdmin.auth.admin.deleteUser(linkedAuthUserId);
+
+        if (
+          authDeleteError &&
+          !/not found/i.test(authDeleteError.message ?? '')
+        ) {
+          throw new BadRequestException(authDeleteError.message);
+        }
+      }
+    }
+
+    const { error: deleteError } = await supabaseAdmin
+      .from('clients')
+      .delete()
+      .eq('id', clientId)
+      .eq('clinic_id', clinicId);
+
+    if (deleteError) throw new BadRequestException(deleteError.message);
+
+    return {
+      ok: true,
+      deleted_client_id: clientId,
+      full_name: existing.full_name,
+    };
+  }
+
+  // =========================================================
   // ADJUST SESSIONS (+10 / -10)
   // =========================================================
   async adjustCredits(
@@ -186,7 +268,6 @@ export class ClientsService {
     if (c.clinic_id !== clinicId)
       throw new ForbiddenException('Client not in your clinic');
 
-    // ⚠️ RPC MUST handle total_sessions correctly (see note below)
     const { error: rpcErr } = await supabaseAdmin.rpc(
       'increment_client_credits',
       {
@@ -232,3 +313,4 @@ export class ClientsService {
     };
   }
 }
+

@@ -185,6 +185,7 @@ export default function QrClientPage() {
       setErrMsg('No sessions remaining.');
       return;
     }
+    if (!confirm('Start the session?')) return;
 
     setBusySession(true);
     setErrMsg(null);
@@ -424,7 +425,7 @@ export default function QrClientPage() {
                       ? 'Starting…'
                       : credits.remaining_sessions < 1
                         ? 'No sessions left'
-                        : 'Start'}
+                        : 'Start (confirm)'}
                   </button>
 
                   {credits.remaining_sessions < 1 && (
@@ -885,3 +886,4 @@ function donutInner(): React.CSSProperties {
     gap: 2,
   };
 }
+

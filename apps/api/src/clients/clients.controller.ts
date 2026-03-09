@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -44,9 +45,6 @@ export class ClientsController {
       throw new BadRequestException('full_name is required');
     }
 
-    // NOTE:
-    // body.initial_sessions is OPTIONAL
-    // default logic is handled inside the service (10 if missing)
     return this.clients.createClient(clinicId, body);
   }
 
@@ -57,7 +55,14 @@ export class ClientsController {
     return this.clients.updateClient(clinicId, id, body);
   }
 
-  // POST /clients/:id/credits   (sessions +10 / -10)
+  // DELETE /clients/:id
+  @Delete(':id')
+  async delete(@Req() req: any, @Param('id') id: string) {
+    const clinicId = req.user.clinicId;
+    return this.clients.deleteClient(clinicId, id);
+  }
+
+  // POST /clients/:id/credits
   @Post(':id/credits')
   async adjustCredits(
     @Req() req: any,
@@ -66,14 +71,10 @@ export class ClientsController {
   ) {
     const clinicId = req.user.clinicId;
 
-    // if (amount !== 10 && amount !== -10) {
-    //   throw new BadRequestException('amount must be 10 or -10');
-    // }
     if (![10, -10, 1, -1].includes(amount)) {
       throw new BadRequestException('amount must be one of: -10, -1, 1, 10');
     }
 
-    // return this.clients.adjustCredits(clinicId, id, amount);
     return this.clients.adjustCredits(clinicId, id, amount as any);
   }
 }

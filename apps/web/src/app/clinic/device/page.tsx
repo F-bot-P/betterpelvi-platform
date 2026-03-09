@@ -165,7 +165,7 @@ export default function ClinicDevicePage() {
           ))}
         </select>
 
-        <label style={label()}>Device ID (Shelly MQTT device id)</label>
+        <label style={label()}>Device ID (from Shelly app)</label>
         <input
           style={input()}
           value={deviceId}
@@ -173,15 +173,15 @@ export default function ClinicDevicePage() {
           placeholder="e.g. shellyplugsg3-8cbfeaa036f4"
         />
 
-        <label style={label()}>Topic Prefix (optional)</label>
+        <label style={label()}>Topic Prefix (optional, recommended for SG3)</label>
         <input
           style={input()}
           value={topicPrefix}
           onChange={(e) => setTopicPrefix(e.target.value)}
-          placeholder="e.g. shellyplugsg3-8cbfeaa036f4"
+          placeholder="e.g. sg3_8cbfeaa036f4"
         />
 
-        <label style={label()}>MQTT Command Topic (optional override)</label>
+        <label style={label()}>MQTT Command Topic (advanced override)</label>
         <input
           style={input()}
           value={mqttTopic}
@@ -206,15 +206,14 @@ export default function ClinicDevicePage() {
             Refresh
           </button>
         </div>
-
         <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.62)', marginTop: 6 }}>
-          Simulation steps (phone charger):
-          <br />1) Plug a phone charger into the Shelly plug.
-          <br />2) Save the chair with Device ID
-          <b> shellyplugsg3-8cbfeaa036f4 </b> (or your exact device id).
-          <br />3) Start session from dashboard or QR page -&gt; charger should turn ON.
-          <br />4) End session manually -&gt; charger should turn OFF immediately.
-          <br />5) Leave one session running -&gt; it should auto-end and turn OFF at 28 minutes.
+          Clinic field guide:
+          <br />1) Chair: choose the exact physical chair you are pairing.
+          <br />2) Device ID: enter the Shelly device id/hostname shown in Shelly app.
+          <br />3) Topic Prefix: for Plug S Gen3 use the MQTT prefix from Shelly (often <b>sg3_&lt;device-mac&gt;</b>).
+          <br />4) MQTT Command Topic: leave empty unless support gives you a custom topic.
+          <br />5) Relay: keep <b>0</b> for a single-outlet Shelly plug.
+          <br />6) Press Confirm, then test start/end from dashboard or QR page.
         </div>
       </div>
     </div>
@@ -278,3 +277,4 @@ function btnPrimary(): React.CSSProperties {
     cursor: 'pointer',
   };
 }
+

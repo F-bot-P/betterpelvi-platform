@@ -144,6 +144,7 @@ export default function ClientDetailPage() {
 
   const [saving, setSaving] = useState(false);
   const [busySession, setBusySession] = useState(false);
+  const [deletingClient, setDeletingClient] = useState(false);
 
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -372,6 +373,30 @@ export default function ClientDetailPage() {
     router.push('/clinic/device');
   }
 
+  async function deleteClientProfile() {
+    if (!client) return;
+    if (
+      !confirm(
+        `Delete ${client.full_name}? This will end active sessions and remove the client profile permanently.`,
+      )
+    ) {
+      return;
+    }
+
+    setDeletingClient(true);
+    try {
+      const res = await authedFetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/clients/${client.id}`,
+        { method: 'DELETE' },
+      );
+      if (!res.ok) throw new Error(await res.text());
+      router.push('/clinic/clients');
+    } catch (e: any) {
+      alert(e?.message ?? String(e));
+    } finally {
+      setDeletingClient(false);
+    }
+  }
   const btnPrimary = (): React.CSSProperties => ({
     width: '100%',
     padding: '10px 14px',
@@ -422,8 +447,20 @@ export default function ClientDetailPage() {
             Pair device
           </button>
 
+          <button
+            style={{
+              ...btnGhost(),
+              borderColor: '#dc2626',
+              color: '#7f1d1d',
+            }}
+            onClick={deleteClientProfile}
+            disabled={deletingClient}
+          >
+            {deletingClient ? 'Deleting...' : 'Delete client'}
+          </button>
+
           <button style={btnGhost()} onClick={() => router.back()}>
-            ← Back
+            Back
           </button>
         </div>
       </div>
@@ -850,3 +887,4 @@ export default function ClientDetailPage() {
     return { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 };
   }
 }
+
