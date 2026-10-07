@@ -74,7 +74,7 @@ export default function HomePage() {
       <header className="bp-home-header">
         <img src="/brand/logo-full-dashboard.png" alt="BetterPelvi" />
         <nav aria-label="Primary navigation">
-          <a href="https://www.onit.al" target="_blank" rel="noreferrer">Website</a>
+          <a href="https://betterpelvi.com/en/" target="_blank" rel="noreferrer">Website</a>
           <Link href="/clinic/login">Clinic login</Link>
           <Link className="bp-button bp-button-primary bp-home-admin-link" href="/admin/login">Platform login</Link>
         </nav>
