@@ -5,7 +5,7 @@ import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-export default function ClinicLoginPage() {
+export default function PlatformLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,26 +29,26 @@ export default function ClinicLoginPage() {
       return;
     }
 
-    router.replace('/clinic/clients');
+    router.replace('/admin');
   }
 
   return (
     <main className="bp-auth-layout">
       <div className="bp-auth-orbit bp-auth-orbit-one" />
       <div className="bp-auth-orbit bp-auth-orbit-two" />
-      <section className="bp-auth-card" aria-labelledby="clinic-login-title">
+      <section className="bp-auth-card" aria-labelledby="platform-login-title">
         <Link href="/" className="bp-brand-link" aria-label="BetterPelvi home">
           <img src="/brand/logo-full-dashboard.png" alt="BetterPelvi" />
         </Link>
-        <p className="bp-eyebrow">Clinic portal</p>
-        <h1 id="clinic-login-title">Start with your team.</h1>
+        <p className="bp-eyebrow">Platform operations</p>
+        <h1 id="platform-login-title">Manage clinic access.</h1>
         <p className="bp-auth-copy">
-          For clinic administrators and staff managing clients, chairs, and sessions.
+          Create clinic accounts, review activity, and keep operations organised.
         </p>
 
         <form className="bp-form" onSubmit={handleLogin}>
           <label>
-            Email
+            Work email
             <input
               type="email"
               value={email}
@@ -71,14 +71,13 @@ export default function ClinicLoginPage() {
           </label>
           {error && <p className="bp-form-error">{error}</p>}
           <button className="bp-button bp-button-primary" disabled={loading}>
-            {loading ? 'Signing in...' : 'Enter clinic portal'}
+            {loading ? 'Signing in...' : 'Open platform dashboard'}
           </button>
         </form>
 
-        <div className="bp-auth-footer">
-          <Link href="/clinic/forgot-password">Reset password</Link>
-          <Link href="/clinic/signup">Need clinic access?</Link>
-        </div>
+        <p className="bp-auth-footnote">
+          Clinic team member? <Link href="/clinic/login">Go to clinic login</Link>
+        </p>
       </section>
     </main>
   );

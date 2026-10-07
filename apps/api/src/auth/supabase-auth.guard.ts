@@ -173,6 +173,17 @@ export class SupabaseAuthGuard implements CanActivate {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
+  private isPlatformAdmin(email: string | undefined) {
+    if (!email) return false;
+
+    const allowedEmails = (process.env.PLATFORM_ADMIN_EMAILS ?? '')
+      .split(',')
+      .map((value) => value.trim().toLowerCase())
+      .filter(Boolean);
+
+    return allowedEmails.includes(email.trim().toLowerCase());
+  }
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // ✅ 0) Allow routes marked as @Public()
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -211,8 +222,12 @@ export class SupabaseAuthGuard implements CanActivate {
       .maybeSingle();
 
     /* 3️⃣ Resolve role safely */
+    const isPlatformAdmin = this.isPlatformAdmin(user.email);
     const role =
-      profile?.role ?? user.user_metadata?.role ?? user.app_metadata?.role;
+      profile?.role ??
+      user.user_metadata?.role ??
+      user.app_metadata?.role ??
+      (isPlatformAdmin ? 'platform_admin' : null);
 
     if (!role) {
       throw new UnauthorizedException('User role missing');
@@ -231,6 +246,7 @@ export class SupabaseAuthGuard implements CanActivate {
       email: user.email,
       role,
       clinicId: profile?.clinic_id ?? null,
+      isPlatformAdmin,
     };
 
     return true;
