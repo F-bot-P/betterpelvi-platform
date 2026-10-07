@@ -64,15 +64,48 @@
 //   );
 // }
 
-export default function Page() {
+import Link from 'next/link';
+
+export default function HomePage() {
   return (
-    <main style={{ padding: 40 }}>
-      <h1>ENV CHECK</h1>
-      <pre>
-NEXT_PUBLIC_API_URL: {process.env.NEXT_PUBLIC_API_URL}
-{'\n'}
-NEXT_PUBLIC_SUPABASE_URL: {process.env.NEXT_PUBLIC_SUPABASE_URL}
-      </pre>
+    <main className="bp-home">
+      <div className="bp-home-halo bp-home-halo-one" />
+      <div className="bp-home-halo bp-home-halo-two" />
+      <header className="bp-home-header">
+        <img src="/brand/logo-full-dashboard.png" alt="BetterPelvi" />
+        <nav aria-label="Primary navigation">
+          <a href="https://www.onit.al" target="_blank" rel="noreferrer">Website</a>
+          <Link href="/clinic/login">Clinic login</Link>
+          <Link className="bp-button bp-button-primary bp-home-admin-link" href="/admin/login">Platform login</Link>
+        </nav>
+      </header>
+
+      <section className="bp-home-hero">
+        <div className="bp-home-copy">
+          <p className="bp-eyebrow">BetterPelvi operations</p>
+          <h1>Care delivery, kept in motion.</h1>
+          <p>
+            A focused operations layer for clinic teams, chair sessions, and a growing BetterPelvi network.
+          </p>
+          <div className="bp-home-actions">
+            <Link className="bp-button bp-button-primary" href="/clinic/login">Enter clinic portal</Link>
+            <Link className="bp-button bp-button-secondary" href="/admin/login">Manage clinics</Link>
+          </div>
+        </div>
+        <div className="bp-home-signal" aria-label="Operational status illustration">
+          <span className="bp-signal-orbit bp-signal-orbit-one" />
+          <span className="bp-signal-orbit bp-signal-orbit-two" />
+          <div className="bp-signal-core"><span>BP</span><small>CONNECTED CARE</small></div>
+          <div className="bp-signal-tag bp-signal-tag-one">CLINIC READY</div>
+          <div className="bp-signal-tag bp-signal-tag-two">SESSION SAFE</div>
+        </div>
+      </section>
+
+      <section className="bp-home-principles" aria-label="BetterPelvi portal features">
+        <article><span>01</span><h2>Clinic teams</h2><p>Secure access for clinic administrators and staff.</p></article>
+        <article><span>02</span><h2>Controlled onboarding</h2><p>Platform operators create each clinic account with the right starting setup.</p></article>
+        <article><span>03</span><h2>Session safety</h2><p>Chair-session and QR workflows remain separated from platform administration.</p></article>
+      </section>
     </main>
   );
 }

@@ -8,6 +8,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { QrModule } from './qr/qr.module';
 import { ChairsModule } from './chairs/chairs.module';
+import { AdminModule } from './admin/admin.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -20,6 +21,7 @@ import { HealthController } from './health.controller';
     SessionsModule,
     QrModule,
     ChairsModule,
+    AdminModule,
   ],
   controllers: [HealthController],
 })

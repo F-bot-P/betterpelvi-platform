@@ -29,7 +29,10 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('Missing user role');
     }
 
-    if (!requiredRoles.includes(user.role)) {
+    const allowsPlatformAdmin =
+      requiredRoles.includes('platform_admin') && user.isPlatformAdmin === true;
+
+    if (!allowsPlatformAdmin && !requiredRoles.includes(user.role)) {
       throw new ForbiddenException('Insufficient role');
     }
 
